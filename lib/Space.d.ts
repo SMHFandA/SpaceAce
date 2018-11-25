@@ -39,6 +39,7 @@ interface SubscriberParams {
   newSpace: Space;
   oldSpace?: Space;
   causedBy?: string;
+  cancel?(): void;
 }
 
 interface Subscriber {

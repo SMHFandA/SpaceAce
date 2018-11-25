@@ -513,4 +513,27 @@ describe('Space', function() {
       assert(!this.newSpace.characters[1]);
     });
   });
+
+  describe('subscribe/middleware', function() {
+    it('calls subscribers in order', function() {
+      const results = [];
+      subscribe(this.space, () => results.push('first'));
+      subscribe(this.space, () => results.push('second'));
+      subscribe(this.space, () => results.push('third'));
+      assert.deepStrictEqual(results, []);
+      this.space({ someVal: true });
+      assert.deepStrictEqual(results, ['first', 'second', 'third']);
+    });
+
+    it('can cancel future subscribers', function() {
+      const results = [];
+      subscribe(this.space, ({ cancel }) => {
+        results.push('first');
+        cancel();
+      });
+      subscribe(this.space, () => results.push('second'));
+      this.space({ someVal: true });
+      assert.deepStrictEqual(results, ['first']);
+    });
+  });
 });

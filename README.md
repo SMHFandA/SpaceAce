@@ -274,6 +274,15 @@ Custom actions can optionally be async functions. If they're async (i.e. return 
 
 **Note**: After an `await`, the `space` that's passed in at the top of the action may be out of date, it's _highly_ recommended to always use `getSpace()` to get the latest version of the space after an `await` (or inside a callback).
 
+### Subsribers and Middleware
+
+* Subscribers are called in the order that they're subscribed
+* Subscribers can optionally act as middleware by returning replacement states.
+  * If a subscriber returns an object, it will be turned into a space, and future subscribers will receive it as their `newSpace`.
+  * If a subscriber returns a promise, subsequent subsribers will wait for the result, and if it’s an object it will be turned into the `newSpace` for future subscribers too.
+* Parent spaces receive the latest returned version after all child space subscribers are called.
+* All future subscribers can be skipped by calling the passed in named param `cancel`.
+
 ### Arrays
 
 Arrays in a space are proper JS arrays, but are frozen. You cannot update them like you can normal spaces. These arrays do have some similarities to spaces though. You can call `toJSON()` on arrays taken from spaces to get a version of the array containing only plain object literals. If you call `isSpace(…)` on an array taken from a space, it will return true.
@@ -339,6 +348,7 @@ The subscriber function is called with the following named params:
 * **newSpace**: The new space that was just created.
 * **oldSpace**: The old version of the space that existing before it was changed.
 * **causedBy**: A string container which part of the space triggered the change, and the name of the action responsible.
+* **cancel**: A function, when called, prevents future subsribers from being called.
 
 ```js
 import { createSpace, subscribe } from 'spaceace';
